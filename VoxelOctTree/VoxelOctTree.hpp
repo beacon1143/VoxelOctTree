@@ -25,8 +25,14 @@ public:
   VoxelOctTree(const std::array<double, 3> _middle, const double _length, const unsigned int _discr);
   ~VoxelOctTree();
 
+  VoxelOctTree() = delete;
+  VoxelOctTree(const VoxelOctTree&) = delete;
+  VoxelOctTree& operator = (const VoxelOctTree& other) = delete;
+
   VoxelOctTree* BuildTree(const std::array<double, 3> _middle, const double _length, const unsigned int _discr, const VoxelOctTree* root);
   void AddVoxel(const std::array<double, 3> point);
   VoxelOctTree* Search(const std::array<double, 3> X) const;
 
+  unsigned int VoxelsCount() const;
+  void CounterIncreaser(unsigned int& cnt) const;
 };

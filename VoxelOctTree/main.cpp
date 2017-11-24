@@ -61,5 +61,7 @@ void main()
     root.AddVoxel(point);
   }
 
+  std::cout << root.VoxelsCount() << std::endl;
+
   return;
 }

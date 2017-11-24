@@ -138,3 +138,21 @@ VoxelOctTree* VoxelOctTree::Search(const std::array<double, 3> X) const {
   return nullptr;
 }
 
+unsigned int VoxelOctTree::VoxelsCount() const {
+  unsigned int counter = 0;
+  this->CounterIncreaser(counter);  
+  return counter;
+}
+
+void VoxelOctTree::CounterIncreaser(unsigned int& cnt) const {
+  if (this->discr == 0) {
+    cnt = cnt + 1;
+  }
+  else {
+    for(int i = 0; i < 8; i++) {
+      if(this->desc[i] != nullptr) {
+        this->desc[i]->CounterIncreaser(cnt);
+      }
+    }
+  }
+}

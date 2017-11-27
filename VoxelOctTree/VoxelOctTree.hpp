@@ -34,5 +34,5 @@ public:
   VoxelOctTree* Search(const std::array<double, 3> X) const;
 
   unsigned int VoxelsCount() const;
-  void CounterIncreaser(unsigned int& cnt) const;
+  //void CounterIncreaser(unsigned int& cnt) const;
 };

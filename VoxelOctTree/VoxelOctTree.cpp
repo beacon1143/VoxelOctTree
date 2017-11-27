@@ -3,6 +3,7 @@
 
 #include "stdafx.h"
 #include <iostream>
+#include <functional>
 #include "VoxelOctTree.hpp"
 
 VoxelOctTree::VoxelOctTree(const std::array<double, 3> _middle, const double _length, const unsigned int _discr) {
@@ -140,19 +141,35 @@ VoxelOctTree* VoxelOctTree::Search(const std::array<double, 3> X) const {
 
 unsigned int VoxelOctTree::VoxelsCount() const {
   unsigned int counter = 0;
-  this->CounterIncreaser(counter);  
+  //this->CounterIncreaser(counter);  
+
+  std::function<void(const VoxelOctTree* oct_tree)> CounterIncrease;
+  CounterIncrease = [&](const VoxelOctTree* oct_tree) mutable {
+    if(oct_tree->discr == 0) {
+      counter++;
+    }
+    else {
+      for (int i = 0; i < 8; i++) {
+        if(oct_tree->desc[i] != nullptr) {
+          CounterIncrease(oct_tree->desc[i]);
+        }
+      }
+    }
+  };
+
+  CounterIncrease(this);
   return counter;
 }
 
-void VoxelOctTree::CounterIncreaser(unsigned int& cnt) const {
-  if (this->discr == 0) {
-    cnt = cnt + 1;
-  }
-  else {
-    for(int i = 0; i < 8; i++) {
-      if(this->desc[i] != nullptr) {
-        this->desc[i]->CounterIncreaser(cnt);
-      }
-    }
-  }
-}
+//void VoxelOctTree::CounterIncreaser(unsigned int& cnt) const {
+//  if (this->discr == 0) {
+//    cnt++;
+//  }
+//  else {
+//    for(int i = 0; i < 8; i++) {
+//      if(this->desc[i] != nullptr) {
+//        this->desc[i]->CounterIncreaser(cnt);
+//      }
+//    }
+//  }
+//}

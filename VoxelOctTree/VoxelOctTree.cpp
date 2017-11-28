@@ -36,19 +36,19 @@ void VoxelOctTree::AddVoxel(const std::array<double, 3> point) {
     getchar();
   }*/
 
-  if ( (point[0] >= middle[0]) && (point[0] <= middle[0] + length/2.0) ) { // Xmore
-    if ( (point[1] >= middle[1]) && (point[1] <= middle[1] + length/2.0) ) { // Ymore
-      if ( (point[2] >= middle[2]) && (point[2] <= middle[2] + length/2.0) ) { // Zmore
+  if ( (point[0] >= middle[0]) && (point[0] <= middle[0] + 0.5*length) ) { // Xmore
+    if ( (point[1] >= middle[1]) && (point[1] <= middle[1] + 0.5*length) ) { // Ymore
+      if ( (point[2] >= middle[2]) && (point[2] <= middle[2] + 0.5*length) ) { // Zmore
         if (this->desc[static_cast<int>(XmoreYmoreZmore)] == nullptr) {
-          std::array<double, 3> new_middle = {this->middle[0] + length/4.0, this->middle[1] + length/4.0, this->middle[2] + length/4.0};
-          this->desc[static_cast<int>(XmoreYmoreZmore)] = BuildTree(new_middle, this->length / 2.0, this->discr - 1, this);
+          std::array<double, 3> new_middle = {this->middle[0] + 0.25*length, this->middle[1] + 0.25*length, this->middle[2] + 0.25*length};
+          this->desc[static_cast<int>(XmoreYmoreZmore)] = BuildTree(new_middle, 0.5 * this->length, this->discr - 1, this);
         }
         this->desc[static_cast<int>(XmoreYmoreZmore)]->AddVoxel(point);
       }
       else if( (point[2] <= middle[2]) /*&& (point[2] >= middle[2] - length/2.0)*/ ) { // Zless
         if (this->desc[static_cast<int>(XmoreYmoreZless)] == nullptr) {
-          std::array<double, 3> new_middle = {this->middle[0] + length/4.0, this->middle[1] + length/4.0, this->middle[2] - length/4.0};
-          this->desc[static_cast<int>(XmoreYmoreZless)] = BuildTree(new_middle, this->length / 2.0, this->discr - 1, this);
+          std::array<double, 3> new_middle = {this->middle[0] + 0.25*length, this->middle[1] + 0.25*length, this->middle[2] - 0.25*length};
+          this->desc[static_cast<int>(XmoreYmoreZless)] = BuildTree(new_middle, 0.5 * this->length, this->discr - 1, this);
         }
         this->desc[static_cast<int>(XmoreYmoreZless)]->AddVoxel(point);
       }
@@ -58,17 +58,17 @@ void VoxelOctTree::AddVoxel(const std::array<double, 3> point) {
       }
     }
     else if ( (point[1] <= middle[1]) /*&& (point[1] >= middle[1] - length/2.0)*/ ) { // Yless
-      if ( (point[2] >= middle[2]) && (point[2] <= middle[2] + length/2.0) ) { // Zmore
+      if ( (point[2] >= middle[2]) && (point[2] <= middle[2] + 0.5*length) ) { // Zmore
         if (this->desc[static_cast<int>(XmoreYlessZmore)] == nullptr) {
-          std::array<double, 3> new_middle = {this->middle[0] + length/4.0, this->middle[1] - length/4.0, this->middle[2] + length/4.0};
-          this->desc[static_cast<int>(XmoreYlessZmore)] = BuildTree(new_middle, this->length / 2.0, this->discr - 1, this);
+          std::array<double, 3> new_middle = {this->middle[0] + 0.25*length, this->middle[1] - 0.25*length, this->middle[2] + 0.25*length};
+          this->desc[static_cast<int>(XmoreYlessZmore)] = BuildTree(new_middle, 0.5 * this->length, this->discr - 1, this);
         }
         this->desc[static_cast<int>(XmoreYlessZmore)]->AddVoxel(point);
       }
       else if ( (point[2] <= middle[2]) /*&& (point[2] >= middle[2] - length/2.0)*/ ) { // Zless
         if (this->desc[static_cast<int>(XmoreYlessZless)] == nullptr) {
-          std::array<double, 3> new_middle = {this->middle[0] + length/4.0, this->middle[1] - length/4.0, this->middle[2] - length/4.0};
-          this->desc[static_cast<int>(XmoreYlessZless)] = BuildTree(new_middle, this->length / 2.0, this->discr - 1, this);
+          std::array<double, 3> new_middle = {this->middle[0] + 0.25*length, this->middle[1] - 0.25*length, this->middle[2] - 0.25*length};
+          this->desc[static_cast<int>(XmoreYlessZless)] = BuildTree(new_middle, 0.5 * this->length, this->discr - 1, this);
         }
         this->desc[static_cast<int>(XmoreYlessZless)]->AddVoxel(point);
       }
@@ -84,18 +84,18 @@ void VoxelOctTree::AddVoxel(const std::array<double, 3> point) {
   }
 
   else if ( (point[0] <= middle[0]) /*&& (point[0] >= middle[0] - length/2.0)*/ ) { // Xless
-    if ( (point[1] >= middle[1]) && (point[1] <= middle[1] + length/2.0) ) { // Ymore
-      if ( (point[2] >= middle[2]) && (point[2] <= middle[2] + length/2.0) ) { // Zmore
+    if ( (point[1] >= middle[1]) && (point[1] <= middle[1] + 0.5*length) ) { // Ymore
+      if ( (point[2] >= middle[2]) && (point[2] <= middle[2] + 0.5*length) ) { // Zmore
         if (this->desc[static_cast<int>(XlessYmoreZmore)] == nullptr) {
-          std::array<double, 3> new_middle = {this->middle[0] - length/4.0, this->middle[1] + length/4.0, this->middle[2] + length/4.0};
-          this->desc[static_cast<int>(XlessYmoreZmore)] = BuildTree(new_middle, this->length / 2.0, this->discr - 1, this);
+          std::array<double, 3> new_middle = {this->middle[0] - 0.25*length, this->middle[1] + 0.25*length, this->middle[2] + 0.25*length};
+          this->desc[static_cast<int>(XlessYmoreZmore)] = BuildTree(new_middle, 0.5 * this->length, this->discr - 1, this);
         }
         this->desc[static_cast<int>(XlessYmoreZmore)]->AddVoxel(point);
       }
       else if ( (point[2] < middle[2]) /*&& (point[2] >= middle[2] - length/2.0)*/ ) { // Zless
         if (this->desc[static_cast<int>(XlessYmoreZless)] == nullptr) {
-          std::array<double, 3> new_middle = {this->middle[0] - length/4.0, this->middle[1] + length/4.0, this->middle[2] - length/4.0};
-          this->desc[static_cast<int>(XlessYmoreZless)] = BuildTree(new_middle, this->length / 2.0, this->discr - 1, this);
+          std::array<double, 3> new_middle = {this->middle[0] - 0.25*length, this->middle[1] + 0.25*length, this->middle[2] - 0.25*length};
+          this->desc[static_cast<int>(XlessYmoreZless)] = BuildTree(new_middle, 0.5 * this->length, this->discr - 1, this);
         }
         this->desc[static_cast<int>(XlessYmoreZless)]->AddVoxel(point);
       }
@@ -105,17 +105,17 @@ void VoxelOctTree::AddVoxel(const std::array<double, 3> point) {
       }
     }
     else if ( (point[1] <= middle[1]) /*&& (point[1] >= middle[1] - length/2.0)*/ ) { // Yless
-      if ( (point[2] >= middle[2]) && (point[2] <= middle[2] + length/2.0) ) { // Zmore
+      if ( (point[2] >= middle[2]) && (point[2] <= middle[2] + 0.5*length) ) { // Zmore
         if (this->desc[static_cast<int>(XlessYlessZmore)] == nullptr) {
-          std::array<double, 3> new_middle = {this->middle[0] - length/4.0, this->middle[1] - length/4.0, this->middle[2] + length/4.0};
-          this->desc[static_cast<int>(XlessYlessZmore)] = BuildTree(new_middle, this->length / 2.0, this->discr - 1, this);
+          std::array<double, 3> new_middle = {this->middle[0] - 0.25*length, this->middle[1] - 0.25*length, this->middle[2] + 0.25*length};
+          this->desc[static_cast<int>(XlessYlessZmore)] = BuildTree(new_middle, 0.5 * this->length, this->discr - 1, this);
         }
         this->desc[static_cast<int>(XlessYlessZmore)]->AddVoxel(point);
       }
       else if ( (point[2] <= middle[2]) /* && (point[2] >= middle[2] - length/2.0)*/ ) { // Zless
         if (this->desc[static_cast<int>(XlessYlessZless)] == nullptr) {
-          std::array<double, 3> new_middle = {this->middle[0] - length/4.0, this->middle[1] - length/4.0, this->middle[2] - length/4.0};
-          this->desc[static_cast<int>(XlessYlessZless)] = BuildTree(new_middle, this->length / 2.0, this->discr - 1, this);
+          std::array<double, 3> new_middle = {this->middle[0] - 0.25*length, this->middle[1] - 0.25*length, this->middle[2] - 0.25*length};
+          this->desc[static_cast<int>(XlessYlessZless)] = BuildTree(new_middle, 0.5 * this->length, this->discr - 1, this);
         }
         this->desc[static_cast<int>(XlessYlessZless)]->AddVoxel(point);
       }
@@ -143,21 +143,20 @@ unsigned int VoxelOctTree::VoxelsCount() const {
   unsigned int counter = 0;
   //this->CounterIncreaser(counter);  
 
-  std::function<void(const VoxelOctTree* oct_tree)> CounterIncrease;
-  CounterIncrease = [&](const VoxelOctTree* oct_tree) mutable {
+   std::function<void(const VoxelOctTree* oct_tree)>CounterIncreaser = [&](const VoxelOctTree* oct_tree) /*mutable*/ {
     if(oct_tree->discr == 0) {
       counter++;
     }
     else {
       for (int i = 0; i < 8; i++) {
         if(oct_tree->desc[i] != nullptr) {
-          CounterIncrease(oct_tree->desc[i]);
+          CounterIncreaser(oct_tree->desc[i]);
         }
       }
     }
   };
 
-  CounterIncrease(this);
+  CounterIncreaser(this);
   return counter;
 }
 
@@ -173,3 +172,112 @@ unsigned int VoxelOctTree::VoxelsCount() const {
 //    }
 //  }
 //}
+
+bool VoxelOctTree::IntersectRayBrick(/*const VoxelOctTree* node, */const Ray& ray) const {
+  const Brick brick = {middle[0] - 0.5 * length, middle[1] - 0.5 * length, middle[2] - 0.5 * length,
+                       middle[0] + 0.5 * length, middle[1] + 0.5 * length, middle[2] + 0.5 * length};
+  /*brick.min_point = {middle[0] - 0.5 * length, middle[1] - 0.5 * length, middle[2] - 0.5 * length};
+  brick.max_point = {middle[0] + 0.5 * length, middle[1] + 0.5 * length, middle[2] + 0.5 * length};*/
+  
+  // check whether initial point is inside the parallelepiped
+  if ( ray.point[0] >= brick.min_point[0] && ray.point[0] <= brick.max_point[0] &&
+       ray.point[1] >= brick.min_point[1] && ray.point[1] <= brick.max_point[1] &&
+       ray.point[2] >= brick.min_point[2] && ray.point[2] <= brick.max_point[2] ) {
+    return true;
+  }
+
+  // ray parameter
+  double t_near = std::numeric_limits<double>::min(),
+         t_far  = std::numeric_limits<double>::max();
+  double t1, t2;
+
+  // directions loop
+  for (int i = 0; i < 3; i++) {
+    if (ray.direction[i] != 0.0) {
+      t1 = (brick.min_point[i] - ray.point[i]) / ray.direction[i];
+      t2 = (brick.max_point[i] - ray.point[i]) / ray.direction[i];
+    
+      if (t1 > t2)
+        std::swap(t1, t2);
+      if (t1 > t_near)
+        t_near = t1;
+      if (t2 < t_far)
+        t_far = t2;
+
+      if (t_near > t_far)
+        return false;
+      if (t_far < 0.0)
+        return false;
+    } // if
+  } // for
+
+  return (t_near <= t_far && t_far >=0);
+}
+
+void VoxelOctTree::FindIntersectedVoxels(const Ray& ray, std::string file_name) const {
+
+  std::fstream output_file;
+  output_file.open(file_name.c_str(), std::fstream::out);
+  if(!output_file.is_open()) {
+    std::cerr << "Cannot open file " << file_name.c_str() << std::endl;
+    return;
+  }
+
+  // sequence of ancestors along the ray
+  std::array<ancestors, 8> AncOrder;
+  if (ray.direction[0] >= 0.0) { // x > 0
+    if (ray.direction[1] >= 0.0) { // y > 0
+      if (ray.direction[2] >= 0.0) { // z > 0
+        AncOrder = {XlessYlessZless, XlessYlessZmore, XlessYmoreZless, XlessYmoreZmore, XmoreYlessZless, XmoreYlessZmore, XmoreYmoreZless, XmoreYmoreZmore};
+      }
+      else { // z < 0
+        AncOrder = {XlessYlessZmore, XlessYlessZless, XlessYmoreZmore, XlessYmoreZless, XmoreYlessZmore, XmoreYlessZless, XmoreYmoreZmore, XmoreYmoreZless};
+      }
+    }
+    else { // y < 0
+      if (ray.direction[2] >= 0.0) { // z > 0
+        AncOrder = {XlessYmoreZless, XlessYmoreZmore, XlessYlessZless, XlessYlessZmore, XmoreYmoreZless, XmoreYmoreZmore, XmoreYlessZless, XmoreYlessZmore};
+      }
+      else { // z < 0
+        AncOrder = {XlessYmoreZmore, XlessYmoreZless, XlessYlessZmore, XlessYlessZless, XmoreYmoreZmore, XmoreYmoreZless, XmoreYlessZmore, XmoreYlessZless};
+      }
+    }
+  }
+  else { // x < 0
+    if (ray.direction[1] >= 0.0) { // y > 0
+      if (ray.direction[2] >= 0.0) { // z > 0
+        AncOrder = {XmoreYlessZless, XmoreYlessZmore, XmoreYmoreZless, XmoreYmoreZmore, XlessYlessZless, XlessYlessZmore, XlessYmoreZless, XlessYmoreZmore};
+      }
+      else { // z < 0
+        AncOrder = {XmoreYlessZmore, XmoreYlessZless, XmoreYmoreZmore, XmoreYmoreZless, XlessYlessZmore, XlessYlessZless, XlessYmoreZmore, XlessYmoreZless};
+      }
+    }
+    else { // y < 0
+      if(ray.direction[2] >= 0.0) { // z > 0
+        AncOrder = {XmoreYmoreZless, XmoreYmoreZmore, XmoreYlessZless, XmoreYlessZmore, XlessYmoreZless, XlessYmoreZmore, XlessYlessZless, XlessYlessZmore};
+      }
+      else { // z < 0
+        AncOrder = {XmoreYmoreZmore, XmoreYmoreZless, XmoreYlessZmore, XmoreYlessZless, XlessYmoreZmore, XlessYmoreZless, XlessYlessZmore, XlessYlessZless};
+      }
+    }
+  }
+
+  std::function<void(const VoxelOctTree* node, const Ray& ray)> IntersectNode = [&](const VoxelOctTree* node, const Ray& ray) mutable {
+    if ( node->IntersectRayBrick(ray) ) {
+      //std::cout << "Intersected! Size is " << node->discr << std::endl;
+      if (node->discr == 0) {
+        output_file << node->middle[0] << " " << node->middle[1] << " " << node->middle[2] << std::endl;
+      }
+      else {
+        for (int i = 0; i < 8; i++) {
+          if (node->desc[AncOrder[i]] != nullptr )
+            IntersectNode(node->desc[AncOrder[i]], ray);
+        } // for
+      } // else
+    } // if    
+  };
+
+  IntersectNode(this, ray);
+
+  output_file.close();
+}

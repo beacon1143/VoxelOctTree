@@ -2,9 +2,20 @@
 //
 
 #include "stdafx.h"
-#include <iostream>
-#include <functional>
+
 #include "VoxelOctTree.hpp"
+
+VoxelOctTree::VoxelOctTree() {
+  for (int i = 0; i < 3; i++) {
+    middle[i] = 0.0;
+  }
+  length = 0.0;
+  discr = 0;
+  //anc = nullptr;
+  for (int i = 0; i < 8; i++) {
+    desc[i] = nullptr;
+  }
+}
 
 VoxelOctTree::VoxelOctTree(const std::array<double, 3> _middle, const double _length, const unsigned int _discr) {
   for (int i = 0; i < 3; i++) {
@@ -20,6 +31,18 @@ VoxelOctTree::VoxelOctTree(const std::array<double, 3> _middle, const double _le
 
 VoxelOctTree::~VoxelOctTree() {
   DeleteTree(this);
+}
+
+void VoxelOctTree::SetMiddle(const std::array<double, 3> _middle) {
+  middle = _middle;
+}
+
+void VoxelOctTree::SetLength(const double _length) {
+  length = _length;
+}
+
+void VoxelOctTree::SetDiscr(const unsigned int _discr) {
+  discr = _discr;
 }
 
 VoxelOctTree* VoxelOctTree::BuildTree(const std::array<double, 3> _middle, const double _length, const unsigned int _discr, const VoxelOctTree* root) {
@@ -44,19 +67,73 @@ void VoxelOctTree::DeleteTree(VoxelOctTree* root) {
         delete root->desc[i];
         root->desc[i] = nullptr;
       }
-    }
-    /*delete root;
-    root = nullptr;*/
+    }    
   }
-     
+}
 
-  /*for (int i = 0; i < 8; i++) {
-    if (root->desc[i] != nullptr) {
-      DeleteTree(root->desc[i]);
-      delete(root->desc[i]);
+bool VoxelOctTree::CreateSvoFromPointCloud(const std::string fileName, const unsigned int discretization/*, VoxelOctTree& root*/) {
+  std::array<double, 3> x;
+  std::array<double, 3> x_min, x_max, x_mid;
+  std::list< std::array<double, 3> > pointsList;
+  //int pointsListSize = 0;
+
+  std::fstream fil;
+  fil.open(fileName.c_str(), std::fstream::in);
+  if (!fil.is_open()) {
+    std::cerr << "Cannot open file " << fileName.c_str() << std::endl;
+    return false;
+  }
+
+  for (int i = 0; i < 3; i++) {
+    x_min[i] = std::numeric_limits<double>::max();
+    x_max[i] = -std::numeric_limits<double>::max();
+  }
+  
+  while (fil >> x[0] >> x[1] >> x[2]) {
+    pointsList.emplace_back(x);
+    //pointsListSize++;
+    
+    for (int i = 0; i < 3; i++) {
+      if(x[i] < x_min[i]) {
+        x_min[i] = x[i];
+      }
+      if(x[i] > x_max[i]) {
+        x_max[i] = x[i];
+      }
     }
+  }
+  fil.close();
+
+  std::cout << x_max[0] << '\t' << x_max[1] << '\t' << x_max[2] << std::endl;
+  std::cout << x_min[0] << '\t' << x_min[1] << '\t' << x_min[2] << std::endl;
+
+  for(int i = 0; i < 3; i++) {
+    x_mid[i] = (x_max[i] + x_min[i]) / 2.0;
+  }
+
+  double model_size = std::max((x_max[0] - x_min[0]), std::max(x_max[1] - x_min[1], x_max[2] - x_min[2]));
+
+  /*root.SetMiddle(x_mid);
+  root.SetLength(model_size);
+  root.SetDiscr(discretization);*/
+  this->middle = x_mid;
+  this->length = model_size;
+  this->discr = discretization;
+
+  for (auto& point : pointsList) {        
+    this->AddVoxel(point);
+  }
+
+  /*auto it = pointsList.begin();
+#pragma omp parallel for
+  for (int i = 0; i < pointsListSize; i++) {
+    this->AddVoxel(*it);
+    it++;
   }*/
-  //delete(root);
+
+  //std::cout << this->VoxelsCount() << std::endl;
+
+  return true;
 }
 
 void VoxelOctTree::AddVoxel(const std::array<double, 3> point) {
@@ -167,10 +244,6 @@ void VoxelOctTree::AddVoxel(const std::array<double, 3> point) {
   }
 }
 
-VoxelOctTree* VoxelOctTree::Search(const std::array<double, 3> X) const {
-  return nullptr;
-}
-
 unsigned int VoxelOctTree::VoxelsCount() const {
   unsigned int counter = 0;
   //this->CounterIncreaser(counter);  
@@ -192,24 +265,9 @@ unsigned int VoxelOctTree::VoxelsCount() const {
   return counter;
 }
 
-//void VoxelOctTree::CounterIncreaser(unsigned int& cnt) const {
-//  if (this->discr == 0) {
-//    cnt++;
-//  }
-//  else {
-//    for(int i = 0; i < 8; i++) {
-//      if(this->desc[i] != nullptr) {
-//        this->desc[i]->CounterIncreaser(cnt);
-//      }
-//    }
-//  }
-//}
-
 bool VoxelOctTree::IntersectRayBrick(/*const VoxelOctTree* node, */const Ray& ray) const {
   const Brick brick = {middle[0] - 0.5 * length, middle[1] - 0.5 * length, middle[2] - 0.5 * length,
                        middle[0] + 0.5 * length, middle[1] + 0.5 * length, middle[2] + 0.5 * length};
-  /*brick.min_point = {middle[0] - 0.5 * length, middle[1] - 0.5 * length, middle[2] - 0.5 * length};
-  brick.max_point = {middle[0] + 0.5 * length, middle[1] + 0.5 * length, middle[2] + 0.5 * length};*/
   
   // check whether initial point is inside the parallelepiped
   if ( ray.point[0] >= brick.min_point[0] && ray.point[0] <= brick.max_point[0] &&
@@ -241,22 +299,16 @@ bool VoxelOctTree::IntersectRayBrick(/*const VoxelOctTree* node, */const Ray& ra
       if (t_far < 0.0)
         return false;
     } // if
+    else {
+      if ( ray.point[i] < brick.min_point[i] || ray.point[i] > brick.max_point[i] )
+        return false;
+    }
   } // for
 
   return (t_near <= t_far && t_far >=0);
 }
 
-void VoxelOctTree::FindIntersectedVoxels(const Ray& ray, std::string file_name) const {
-
-  std::fstream output_file;
-  output_file.open(file_name.c_str(), std::fstream::out);
-  if(!output_file.is_open()) {
-    std::cerr << "Cannot open file " << file_name.c_str() << std::endl;
-    return;
-  }
-
-  // sequence of ancestors along the ray
-  std::array<ancestors, 8> AncOrder;
+void VoxelOctTree::MakeOrderArray(const Ray& ray, std::array<ancestors, 8>& AncOrder) const {
   if (ray.direction[0] >= 0.0) { // x > 0
     if (ray.direction[1] >= 0.0) { // y > 0
       if (ray.direction[2] >= 0.0) { // z > 0
@@ -293,6 +345,20 @@ void VoxelOctTree::FindIntersectedVoxels(const Ray& ray, std::string file_name) 
       }
     }
   }
+}
+
+void VoxelOctTree::FindIntersectedVoxels(const Ray& ray, std::string file_name) const {
+
+  std::fstream output_file;
+  output_file.open(file_name.c_str(), std::fstream::out);
+  if(!output_file.is_open()) {
+    std::cerr << "Cannot open file " << file_name.c_str() << std::endl;
+    return;
+  }
+
+  // sequence of ancestors along the ray
+  std::array<ancestors, 8> AncOrder;  
+  MakeOrderArray(ray, AncOrder);
 
   std::function<void(const VoxelOctTree* node, const Ray& ray)> IntersectNode = [&](const VoxelOctTree* node, const Ray& ray) mutable {
     if ( node->IntersectRayBrick(ray) ) {

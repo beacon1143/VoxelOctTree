@@ -104,8 +104,8 @@ bool VoxelOctTree::CreateSvoFromPointCloud(const std::string fileName, const uns
   }
   fil.close();
 
-  std::cout << x_max[0] << '\t' << x_max[1] << '\t' << x_max[2] << std::endl;
-  std::cout << x_min[0] << '\t' << x_min[1] << '\t' << x_min[2] << std::endl;
+  /*std::cout << x_max[0] << '\t' << x_max[1] << '\t' << x_max[2] << std::endl;
+  std::cout << x_min[0] << '\t' << x_min[1] << '\t' << x_min[2] << std::endl;*/
 
   for(int i = 0; i < 3; i++) {
     x_mid[i] = (x_max[i] + x_min[i]) / 2.0;
@@ -113,9 +113,6 @@ bool VoxelOctTree::CreateSvoFromPointCloud(const std::string fileName, const uns
 
   double model_size = std::max((x_max[0] - x_min[0]), std::max(x_max[1] - x_min[1], x_max[2] - x_min[2]));
 
-  /*root.SetMiddle(x_mid);
-  root.SetLength(model_size);
-  root.SetDiscr(discretization);*/
   this->middle = x_mid;
   this->length = model_size;
   this->discr = discretization;

@@ -12,19 +12,51 @@ VoxelOctTree::VoxelOctTree(const std::array<double, 3> _middle, const double _le
   }
   length = _length;
   discr = _discr;
-  anc = nullptr;
+  //anc = nullptr;
   for (int i = 0; i < 8; i++) {
     desc[i] = nullptr;
   }
 }
 
 VoxelOctTree::~VoxelOctTree() {
+  DeleteTree(this);
 }
 
 VoxelOctTree* VoxelOctTree::BuildTree(const std::array<double, 3> _middle, const double _length, const unsigned int _discr, const VoxelOctTree* root) {
   VoxelOctTree* new_node = new VoxelOctTree(_middle, _length, _discr);
-  new_node->anc = const_cast<VoxelOctTree*>(root);
+  //new_node->anc = const_cast<VoxelOctTree*>(root);
   return new_node;
+}
+
+void VoxelOctTree::DeleteTree(VoxelOctTree* root) {
+  if (root != nullptr && root->discr > 0) {
+    //std::cout << root->discr << std::endl;
+    std::array<VoxelOctTree*, 8> descenants;
+    for (int i = 0; i < 8; i++) {
+      descenants[i] = root->desc[i];      
+    }
+    for (int i = 0; i < 8; i++) {
+      if (descenants[i] != nullptr)
+        DeleteTree(descenants[i]);      
+    }
+    for (int i = 0; i < 8; i++) {
+      if (root->desc[i] != nullptr) {
+        delete root->desc[i];
+        root->desc[i] = nullptr;
+      }
+    }
+    /*delete root;
+    root = nullptr;*/
+  }
+     
+
+  /*for (int i = 0; i < 8; i++) {
+    if (root->desc[i] != nullptr) {
+      DeleteTree(root->desc[i]);
+      delete(root->desc[i]);
+    }
+  }*/
+  //delete(root);
 }
 
 void VoxelOctTree::AddVoxel(const std::array<double, 3> point) {
@@ -270,8 +302,8 @@ void VoxelOctTree::FindIntersectedVoxels(const Ray& ray, std::string file_name) 
       }
       else {
         for (int i = 0; i < 8; i++) {
-          if (node->desc[AncOrder[i]] != nullptr )
-            IntersectNode(node->desc[AncOrder[i]], ray);
+          if (node->desc[ static_cast<int>(AncOrder[i]) ] != nullptr )
+            IntersectNode(node->desc[ static_cast<int>(AncOrder[i]) ], ray);
         } // for
       } // else
     } // if    

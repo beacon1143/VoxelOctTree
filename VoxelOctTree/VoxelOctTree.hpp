@@ -29,7 +29,7 @@ private:
   std::array<double, 3> middle;
   double length;         // physical size of OctTree
   unsigned int discr;    // degree of 2, i.e. amount of OctTree levels
-  VoxelOctTree* anc;
+  //VoxelOctTree* anc;
   VoxelOctTree* desc[8];
 
 public:
@@ -42,6 +42,8 @@ public:
   VoxelOctTree& operator = (const VoxelOctTree& other) = delete;
 
   VoxelOctTree* BuildTree(const std::array<double, 3> _middle, const double _length, const unsigned int _discr, const VoxelOctTree* root);
+  static void DeleteTree(VoxelOctTree* root);
+
   void AddVoxel(const std::array<double, 3> point);
   VoxelOctTree* Search(const std::array<double, 3> X) const;
 

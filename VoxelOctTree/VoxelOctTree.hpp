@@ -36,30 +36,31 @@ private:
   //VoxelOctTree* anc;
   VoxelOctTree* desc[8];
 
+  // build and delete
+  VoxelOctTree* BuildTree(const std::array<double, 3> _middle, const double _length, const unsigned int _discr, const VoxelOctTree* root);
+  void DeleteTree(VoxelOctTree* root);
+
+  bool IntersectRayBrick(const Ray& ray) const;
+  void MakeOrderArray(const Ray& ray, std::array<ancestors, 8>& AncOrder) const;
+
 public:
   VoxelOctTree();
   VoxelOctTree(const std::array<double, 3> _middle, const double _length, const unsigned int _discr);
   ~VoxelOctTree();
 
-  void SetMiddle(const std::array<double, 3> _middle);
+  /*void SetMiddle(const std::array<double, 3> _middle);
   void SetLength(const double _length);
-  void SetDiscr(const unsigned int _discr);
+  void SetDiscr(const unsigned int _discr);*/
 
-  // default constructors and operator=
+  // default copy constructor and operator=
   VoxelOctTree(const VoxelOctTree&) = delete;
   VoxelOctTree& operator = (const VoxelOctTree& other) = delete;
 
-  // build and delete
-  VoxelOctTree* BuildTree(const std::array<double, 3> _middle, const double _length, const unsigned int _discr, const VoxelOctTree* root);
-  void DeleteTree(VoxelOctTree* root);
-
-  bool CreateSvoFromPointCloud(const std::string fileName, const unsigned int discretization/*, VoxelOctTree& oct_tree*/);
+  bool CreateSvoFromPointCloud(const std::string fileName, const unsigned int discretization);
 
   void AddVoxel(const std::array<double, 3> point);  
   unsigned int VoxelsCount() const;
   
   // voxels intersected by ray
-  bool IntersectRayBrick(/*const VoxelOctTree* node, */const Ray& ray) const;
-  void MakeOrderArray(const Ray& ray, std::array<ancestors, 8>& AncOrder) const;
   void FindIntersectedVoxels(const Ray& ray, std::string file_name) const;
 };

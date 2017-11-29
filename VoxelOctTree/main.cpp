@@ -6,20 +6,41 @@
 #include <string>
 
 
-void main()
+int main()
 {
   VoxelOctTree root;
   std::string fileName;
   unsigned int discr;
-  std::cout << "Input name of the file with point cloud:\n";
+  std::cout << "Input name of the file with point cloud:\n";    // transformer.xyz
   std::cin >> fileName;
-  std::cout << "Input degree of discretization (number of levels in voxel octtree:\n";
+  std::cout << "Input degree of discretization (number of levels in voxel octtree):\n";    // 8
   std::cin >> discr;
+  std::cout << "Creating voxel octtree, please wait..." << std::endl;
 
-  if ( root.CreateSvoFromPointCloud(fileName, discr/*, root*/) ) {
-    Ray ray = {0, 75, 11, 1.0, 0.0, 0.0};
-    root.FindIntersectedVoxels(ray, "intersected_voxels.txt");    
+  std::string repeat;
+  Ray ray;
+
+  if ( root.CreateSvoFromPointCloud(fileName, discr) ) {
+    std::cout << "Voxel octtree created" << std::endl;
+    do {
+      std::cout << "Do you want to intersect the voxel octtree by a ray? (y/n)\n";
+      std::cin >> repeat;
+      if (repeat == "y") {
+        std::cout << "Input 3 coordinates of ray initial point:\n";    // 0 75 11
+        std::cin >> ray.point[0] >> ray.point[1] >> ray.point[2];
+        std::cout << "Input 3 coordinates of ray direction:\n";    // 1 0 0
+        std::cin >> ray.direction[0] >> ray.direction[1] >> ray.direction[2];
+        root.FindIntersectedVoxels(ray, "intersected_voxels.txt");
+        std::cout << "Coordinates of intersected voxels center are writed to the file intersected_voxels.txt" << std::endl;
+      }
+      else if (repeat == "n") {
+        return 0;
+      }
+      else
+        continue;
+    }
+    while (repeat != "n");    
   }
   else
-    return;  
+    return 1;  
 }

@@ -33,7 +33,7 @@ VoxelOctTree::~VoxelOctTree() {
   DeleteTree(this);
 }
 
-void VoxelOctTree::SetMiddle(const std::array<double, 3> _middle) {
+/*void VoxelOctTree::SetMiddle(const std::array<double, 3> _middle) {
   middle = _middle;
 }
 
@@ -43,7 +43,7 @@ void VoxelOctTree::SetLength(const double _length) {
 
 void VoxelOctTree::SetDiscr(const unsigned int _discr) {
   discr = _discr;
-}
+}*/
 
 VoxelOctTree* VoxelOctTree::BuildTree(const std::array<double, 3> _middle, const double _length, const unsigned int _discr, const VoxelOctTree* root) {
   VoxelOctTree* new_node = new VoxelOctTree(_middle, _length, _discr);
@@ -56,22 +56,17 @@ void VoxelOctTree::DeleteTree(VoxelOctTree* root) {
     //std::cout << root->discr << std::endl;
     std::array<VoxelOctTree*, 8> descenants;
     for (int i = 0; i < 8; i++) {
-      descenants[i] = root->desc[i];      
-    }
-    for (int i = 0; i < 8; i++) {
-      if (descenants[i] != nullptr)
-        DeleteTree(descenants[i]);      
-    }
-    for (int i = 0; i < 8; i++) {
+      descenants[i] = root->desc[i];
+      DeleteTree(descenants[i]);
       if (root->desc[i] != nullptr) {
         delete root->desc[i];
         root->desc[i] = nullptr;
       }
-    }    
+    }      
   }
 }
 
-bool VoxelOctTree::CreateSvoFromPointCloud(const std::string fileName, const unsigned int discretization/*, VoxelOctTree& root*/) {
+bool VoxelOctTree::CreateSvoFromPointCloud(const std::string fileName, const unsigned int discretization) {
   std::array<double, 3> x;
   std::array<double, 3> x_min, x_max, x_mid;
   std::list< std::array<double, 3> > pointsList;
@@ -262,7 +257,7 @@ unsigned int VoxelOctTree::VoxelsCount() const {
   return counter;
 }
 
-bool VoxelOctTree::IntersectRayBrick(/*const VoxelOctTree* node, */const Ray& ray) const {
+bool VoxelOctTree::IntersectRayBrick(const Ray& ray) const {
   const Brick brick = {middle[0] - 0.5 * length, middle[1] - 0.5 * length, middle[2] - 0.5 * length,
                        middle[0] + 0.5 * length, middle[1] + 0.5 * length, middle[2] + 0.5 * length};
   

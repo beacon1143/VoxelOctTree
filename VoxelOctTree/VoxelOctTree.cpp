@@ -7,6 +7,138 @@
 
 namespace VOXEL_OCTTREE {
 
+  // private
+
+  VoxelOctTree* VoxelOctTree::BuildTree(const std::array<double, 3> _middle, const double _length, const unsigned int _discr, const VoxelOctTree* root) {
+    VoxelOctTree* new_node = new VoxelOctTree(_middle, _length, _discr);
+    //new_node->anc = const_cast<VoxelOctTree*>(root);
+    return new_node;
+  }
+
+  void VoxelOctTree::DeleteTree(VoxelOctTree* root) {
+    if (root != nullptr && root->discr > 0) {
+      //std::cout << root->discr << std::endl;
+      std::array<VoxelOctTree*, 8> descenants;
+      for (int i = 0; i < 8; i++) {
+        descenants[i] = root->desc[i];
+        DeleteTree(descenants[i]);
+        if (root->desc[i] != nullptr) {
+          delete root->desc[i];
+          root->desc[i] = nullptr;
+        }
+      }      
+    }
+  }
+
+  bool VoxelOctTree::IntersectRayBrick(const Ray& ray) const {
+    const Brick brick = {middle[0] - 0.5 * length, middle[1] - 0.5 * length, middle[2] - 0.5 * length,
+                         middle[0] + 0.5 * length, middle[1] + 0.5 * length, middle[2] + 0.5 * length};
+  
+    // check whether initial point is inside the parallelepiped
+    if ( ray.start[0] >= brick.min_point[0] && ray.start[0] <= brick.max_point[0] &&
+         ray.start[1] >= brick.min_point[1] && ray.start[1] <= brick.max_point[1] &&
+         ray.start[2] >= brick.min_point[2] && ray.start[2] <= brick.max_point[2] ) {
+      return true;
+    }
+
+    // ray parameter
+    double t_near = std::numeric_limits<double>::min(),
+           t_far  = std::numeric_limits<double>::max();
+    double t1, t2;
+
+    // directions loop
+    for (int i = 0; i < 3; i++) {
+      if (ray.direction[i] != 0.0) {
+        t1 = (brick.min_point[i] - ray.start[i]) / ray.direction[i];
+        t2 = (brick.max_point[i] - ray.start[i]) / ray.direction[i];
+    
+        if (t1 > t2)
+          std::swap(t1, t2);
+        if (t1 > t_near)
+          t_near = t1;
+        if (t2 < t_far)
+          t_far = t2;
+
+        if (t_near > t_far)
+          return false;
+        if (t_far < 0.0)
+          return false;
+      } // if
+      else {
+        if ( ray.start[i] < brick.min_point[i] || ray.start[i] > brick.max_point[i] )
+          return false;
+      }
+    } // for
+
+    return (t_near <= t_far && t_far >=0);
+  }
+
+  std::array<int, 8> VoxelOctTree::GetOrderArray(const Ray& ray) const {
+    std::array<ancestors, 8> AncOrder = {XlessYlessZless, XlessYlessZmore, XlessYmoreZless, XlessYmoreZmore, XmoreYlessZless, XmoreYlessZmore, XmoreYmoreZless, XmoreYmoreZmore};
+    if (ray.direction[0] < 0.0) {
+      for (int i = 0; i < 4; i++) {
+        std::swap(AncOrder[i], AncOrder[i+4]);
+      }
+    }
+    if (ray.direction[1] < 0.0) {
+      for (int i = 0; i < 2; i++) {
+        std::swap(AncOrder[i], AncOrder[i+2]);
+        std::swap(AncOrder[i+4], AncOrder[i+6]);
+      }
+    }
+    if (ray.direction[2] < 0.0) {
+      for (int i = 0; i < 4; i++) {
+        std::swap(AncOrder[2*i], AncOrder[2*i+1]);
+      }
+    }
+
+    /*if (ray.direction[0] >= 0.0) { // x > 0
+      if (ray.direction[1] >= 0.0) { // y > 0
+        if (ray.direction[2] >= 0.0) { // z > 0
+          AncOrder = {XlessYlessZless, XlessYlessZmore, XlessYmoreZless, XlessYmoreZmore, XmoreYlessZless, XmoreYlessZmore, XmoreYmoreZless, XmoreYmoreZmore};
+        }
+        else { // z < 0
+          AncOrder = {XlessYlessZmore, XlessYlessZless, XlessYmoreZmore, XlessYmoreZless, XmoreYlessZmore, XmoreYlessZless, XmoreYmoreZmore, XmoreYmoreZless};
+        }
+      }
+      else { // y < 0
+        if (ray.direction[2] >= 0.0) { // z > 0
+          AncOrder = {XlessYmoreZless, XlessYmoreZmore, XlessYlessZless, XlessYlessZmore, XmoreYmoreZless, XmoreYmoreZmore, XmoreYlessZless, XmoreYlessZmore};
+        }
+        else { // z < 0
+          AncOrder = {XlessYmoreZmore, XlessYmoreZless, XlessYlessZmore, XlessYlessZless, XmoreYmoreZmore, XmoreYmoreZless, XmoreYlessZmore, XmoreYlessZless};
+        }
+      }
+    }
+    else { // x < 0
+      if (ray.direction[1] >= 0.0) { // y > 0
+        if (ray.direction[2] >= 0.0) { // z > 0
+          AncOrder = {XmoreYlessZless, XmoreYlessZmore, XmoreYmoreZless, XmoreYmoreZmore, XlessYlessZless, XlessYlessZmore, XlessYmoreZless, XlessYmoreZmore};
+        }
+        else { // z < 0
+          AncOrder = {XmoreYlessZmore, XmoreYlessZless, XmoreYmoreZmore, XmoreYmoreZless, XlessYlessZmore, XlessYlessZless, XlessYmoreZmore, XlessYmoreZless};
+        }
+      }
+      else { // y < 0
+        if(ray.direction[2] >= 0.0) { // z > 0
+          AncOrder = {XmoreYmoreZless, XmoreYmoreZmore, XmoreYlessZless, XmoreYlessZmore, XlessYmoreZless, XlessYmoreZmore, XlessYlessZless, XlessYlessZmore};
+        }
+        else { // z < 0
+          AncOrder = {XmoreYmoreZmore, XmoreYmoreZless, XmoreYlessZmore, XmoreYlessZless, XlessYmoreZmore, XlessYmoreZless, XlessYlessZmore, XlessYlessZless};
+        }
+      }
+    }*/
+
+    std::array<int, 8> _AncOrder;
+    for (int i = 0; i < 8; i++) {
+      _AncOrder[i] = static_cast<int>(AncOrder[i]);
+    }
+
+    return _AncOrder;
+  }
+
+  // public
+
   VoxelOctTree::VoxelOctTree() {
     for (int i = 0; i < 3; i++) {
       middle[i] = 0.0;
@@ -47,27 +179,6 @@ namespace VOXEL_OCTTREE {
     discr = _discr;
   }*/
 
-  VoxelOctTree* VoxelOctTree::BuildTree(const std::array<double, 3> _middle, const double _length, const unsigned int _discr, const VoxelOctTree* root) {
-    VoxelOctTree* new_node = new VoxelOctTree(_middle, _length, _discr);
-    //new_node->anc = const_cast<VoxelOctTree*>(root);
-    return new_node;
-  }
-
-  void VoxelOctTree::DeleteTree(VoxelOctTree* root) {
-    if (root != nullptr && root->discr > 0) {
-      //std::cout << root->discr << std::endl;
-      std::array<VoxelOctTree*, 8> descenants;
-      for (int i = 0; i < 8; i++) {
-        descenants[i] = root->desc[i];
-        DeleteTree(descenants[i]);
-        if (root->desc[i] != nullptr) {
-          delete root->desc[i];
-          root->desc[i] = nullptr;
-        }
-      }      
-    }
-  }
-
   bool VoxelOctTree::CreateSvoFromPointCloud(const std::string fileName, const unsigned int discretization) {
     std::array<double, 3> x;
     std::array<double, 3> x_min, x_max, x_mid;
@@ -101,8 +212,8 @@ namespace VOXEL_OCTTREE {
     }
     fil.close();
 
-    /*std::cout << x_max[0] << '\t' << x_max[1] << '\t' << x_max[2] << std::endl;
-    std::cout << x_min[0] << '\t' << x_min[1] << '\t' << x_min[2] << std::endl;*/
+    std::cout << x_max[0] << '\t' << x_max[1] << '\t' << x_max[2] << std::endl;
+    std::cout << x_min[0] << '\t' << x_min[1] << '\t' << x_min[2] << std::endl;
 
     for(int i = 0; i < 3; i++) {
       x_mid[i] = (x_max[i] + x_min[i]) / 2.0;
@@ -125,7 +236,7 @@ namespace VOXEL_OCTTREE {
       it++;
     }*/
 
-    //std::cout << this->VoxelsCount() << std::endl;
+    std::cout << this->VoxelsCount() << std::endl;
 
     return true;
   }
@@ -258,98 +369,7 @@ namespace VOXEL_OCTTREE {
     CounterIncreaser(this);
     return counter;
   }
-
-  bool VoxelOctTree::IntersectRayBrick(const Ray& ray) const {
-    const Brick brick = {middle[0] - 0.5 * length, middle[1] - 0.5 * length, middle[2] - 0.5 * length,
-                         middle[0] + 0.5 * length, middle[1] + 0.5 * length, middle[2] + 0.5 * length};
   
-    // check whether initial point is inside the parallelepiped
-    if ( ray.start[0] >= brick.min_point[0] && ray.start[0] <= brick.max_point[0] &&
-         ray.start[1] >= brick.min_point[1] && ray.start[1] <= brick.max_point[1] &&
-         ray.start[2] >= brick.min_point[2] && ray.start[2] <= brick.max_point[2] ) {
-      return true;
-    }
-
-    // ray parameter
-    double t_near = std::numeric_limits<double>::min(),
-           t_far  = std::numeric_limits<double>::max();
-    double t1, t2;
-
-    // directions loop
-    for (int i = 0; i < 3; i++) {
-      if (ray.direction[i] != 0.0) {
-        t1 = (brick.min_point[i] - ray.start[i]) / ray.direction[i];
-        t2 = (brick.max_point[i] - ray.start[i]) / ray.direction[i];
-    
-        if (t1 > t2)
-          std::swap(t1, t2);
-        if (t1 > t_near)
-          t_near = t1;
-        if (t2 < t_far)
-          t_far = t2;
-
-        if (t_near > t_far)
-          return false;
-        if (t_far < 0.0)
-          return false;
-      } // if
-      else {
-        if ( ray.start[i] < brick.min_point[i] || ray.start[i] > brick.max_point[i] )
-          return false;
-      }
-    } // for
-
-    return (t_near <= t_far && t_far >=0);
-  }
-
-  std::array<int, 8> VoxelOctTree::GetOrderArray(const Ray& ray) const {
-    std::array<ancestors, 8> AncOrder;
-
-    if (ray.direction[0] >= 0.0) { // x > 0
-      if (ray.direction[1] >= 0.0) { // y > 0
-        if (ray.direction[2] >= 0.0) { // z > 0
-          AncOrder = {XlessYlessZless, XlessYlessZmore, XlessYmoreZless, XlessYmoreZmore, XmoreYlessZless, XmoreYlessZmore, XmoreYmoreZless, XmoreYmoreZmore};
-        }
-        else { // z < 0
-          AncOrder = {XlessYlessZmore, XlessYlessZless, XlessYmoreZmore, XlessYmoreZless, XmoreYlessZmore, XmoreYlessZless, XmoreYmoreZmore, XmoreYmoreZless};
-        }
-      }
-      else { // y < 0
-        if (ray.direction[2] >= 0.0) { // z > 0
-          AncOrder = {XlessYmoreZless, XlessYmoreZmore, XlessYlessZless, XlessYlessZmore, XmoreYmoreZless, XmoreYmoreZmore, XmoreYlessZless, XmoreYlessZmore};
-        }
-        else { // z < 0
-          AncOrder = {XlessYmoreZmore, XlessYmoreZless, XlessYlessZmore, XlessYlessZless, XmoreYmoreZmore, XmoreYmoreZless, XmoreYlessZmore, XmoreYlessZless};
-        }
-      }
-    }
-    else { // x < 0
-      if (ray.direction[1] >= 0.0) { // y > 0
-        if (ray.direction[2] >= 0.0) { // z > 0
-          AncOrder = {XmoreYlessZless, XmoreYlessZmore, XmoreYmoreZless, XmoreYmoreZmore, XlessYlessZless, XlessYlessZmore, XlessYmoreZless, XlessYmoreZmore};
-        }
-        else { // z < 0
-          AncOrder = {XmoreYlessZmore, XmoreYlessZless, XmoreYmoreZmore, XmoreYmoreZless, XlessYlessZmore, XlessYlessZless, XlessYmoreZmore, XlessYmoreZless};
-        }
-      }
-      else { // y < 0
-        if(ray.direction[2] >= 0.0) { // z > 0
-          AncOrder = {XmoreYmoreZless, XmoreYmoreZmore, XmoreYlessZless, XmoreYlessZmore, XlessYmoreZless, XlessYmoreZmore, XlessYlessZless, XlessYlessZmore};
-        }
-        else { // z < 0
-          AncOrder = {XmoreYmoreZmore, XmoreYmoreZless, XmoreYlessZmore, XmoreYlessZless, XlessYmoreZmore, XlessYmoreZless, XlessYlessZmore, XlessYlessZless};
-        }
-      }
-    }
-
-    std::array<int, 8> _AncOrder;
-    for (int i = 0; i < 8; i++) {
-      _AncOrder[i] = static_cast<int>(AncOrder[i]);
-    }
-
-    return _AncOrder;
-  }
-
   void VoxelOctTree::FindIntersectedVoxels(const Ray& ray, std::string file_name) const {
 
     std::fstream output_file;

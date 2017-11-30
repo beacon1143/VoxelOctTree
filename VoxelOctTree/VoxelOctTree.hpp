@@ -7,60 +7,64 @@
 #include <functional>
 #include <list>
 
-typedef enum {
-  XmoreYmoreZmore = 0,
-  XmoreYmoreZless = 1,
-  XmoreYlessZmore = 2,
-  XmoreYlessZless = 3,
-  XlessYmoreZmore = 4,
-  XlessYmoreZless = 5,
-  XlessYlessZmore = 6,
-  XlessYlessZless = 7
-} ancestors;
+namespace VOXEL_OCTTREE {
 
-struct Brick {
-  std::array<double, 3> min_point;
-  std::array<double, 3> max_point;
-};
+  typedef enum {
+    XmoreYmoreZmore = 0,
+    XmoreYmoreZless = 1,
+    XmoreYlessZmore = 2,
+    XmoreYlessZless = 3,
+    XlessYmoreZmore = 4,
+    XlessYmoreZless = 5,
+    XlessYlessZmore = 6,
+    XlessYlessZless = 7
+  } ancestors;
 
-struct Ray {
-  std::array<double, 3> point;
-  std::array<double, 3> direction;
-};
+  struct Brick {
+    std::array<double, 3> min_point;
+    std::array<double, 3> max_point;
+  };
 
-class VoxelOctTree {
-private:
-  std::array<double, 3> middle;
-  double length;         // physical size of OctTree
-  unsigned int discr;    // degree of 2, i.e. amount of OctTree levels
-  //VoxelOctTree* anc;
-  VoxelOctTree* desc[8];
+  struct Ray {
+    std::array<double, 3> start;
+    std::array<double, 3> direction;
+  };
 
-  // build and delete
-  VoxelOctTree* BuildTree(const std::array<double, 3> _middle, const double _length, const unsigned int _discr, const VoxelOctTree* root);
-  void DeleteTree(VoxelOctTree* root);
+  class VoxelOctTree {
+  private:
+    std::array<double, 3> middle;
+    double length;         // physical size of OctTree
+    unsigned int discr;    // degree of 2, i.e. amount of OctTree levels
+    //VoxelOctTree* anc;
+    VoxelOctTree* desc[8];
 
-  bool IntersectRayBrick(const Ray& ray) const;
-  void MakeOrderArray(const Ray& ray, std::array<ancestors, 8>& AncOrder) const;
+    // build and delete
+    VoxelOctTree* BuildTree(const std::array<double, 3> _middle, const double _length, const unsigned int _discr, const VoxelOctTree* root);
+    void DeleteTree(VoxelOctTree* root);
 
-public:
-  VoxelOctTree();
-  VoxelOctTree(const std::array<double, 3> _middle, const double _length, const unsigned int _discr);
-  ~VoxelOctTree();
+    bool IntersectRayBrick(const Ray& ray) const;
+    void MakeOrderArray(const Ray& ray, std::array<ancestors, 8>& AncOrder) const;
 
-  /*void SetMiddle(const std::array<double, 3> _middle);
-  void SetLength(const double _length);
-  void SetDiscr(const unsigned int _discr);*/
+  public:
+    VoxelOctTree();
+    VoxelOctTree(const std::array<double, 3> _middle, const double _length, const unsigned int _discr);
+    ~VoxelOctTree();
 
-  // default copy constructor and operator=
-  VoxelOctTree(const VoxelOctTree&) = delete;
-  VoxelOctTree& operator = (const VoxelOctTree& other) = delete;
+    /*void SetMiddle(const std::array<double, 3> _middle);
+    void SetLength(const double _length);
+    void SetDiscr(const unsigned int _discr);*/
 
-  bool CreateSvoFromPointCloud(const std::string fileName, const unsigned int discretization);
+    // default copy constructor and operator=
+    VoxelOctTree(const VoxelOctTree&) = delete;
+    VoxelOctTree& operator = (const VoxelOctTree& other) = delete;
 
-  void AddVoxel(const std::array<double, 3> point);  
-  unsigned int VoxelsCount() const;
+    bool CreateSvoFromPointCloud(const std::string fileName, const unsigned int discretization);
+
+    void AddVoxel(const std::array<double, 3> point);  
+    unsigned int VoxelsCount() const;
   
-  // voxels intersected by ray
-  void FindIntersectedVoxels(const Ray& ray, std::string file_name) const;
-};
+    // voxels intersected by ray
+    void FindIntersectedVoxels(const Ray& ray, std::string file_name) const;
+  };
+
+} // namespace

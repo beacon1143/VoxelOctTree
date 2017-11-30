@@ -5,6 +5,7 @@
 #include <iostream>
 #include <string>
 
+using namespace VOXEL_OCTTREE;
 
 int main()
 {
@@ -23,11 +24,11 @@ int main()
   if ( root.CreateSvoFromPointCloud(fileName, discr) ) {
     std::cout << "Voxel octtree created" << std::endl;
     do {
-      std::cout << "Do you want to intersect the voxel octtree by a ray? (y/n)\n";
+      std::cout << "Do you want to intersect the voxel octtree with a ray? (y/n)\n";
       std::cin >> repeat;
       if (repeat == "y") {
         std::cout << "Input 3 coordinates of ray initial point:\n";    // 0 75 11
-        std::cin >> ray.point[0] >> ray.point[1] >> ray.point[2];
+        std::cin >> ray.start[0] >> ray.start[1] >> ray.start[2];
         std::cout << "Input 3 coordinates of ray direction:\n";    // 1 0 0
         std::cin >> ray.direction[0] >> ray.direction[1] >> ray.direction[2];
         root.FindIntersectedVoxels(ray, "intersected_voxels.txt");

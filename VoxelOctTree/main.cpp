@@ -16,13 +16,11 @@ int main()
   std::cin >> fileName;
   std::cout << "Input degree of discretization (number of levels in voxel octtree):\n";    // 8
   std::cin >> discr;
-  std::cout << "Creating voxel octtree, please wait..." << std::endl;
-
+  
   std::string repeat;
   Ray ray;
 
   if ( root.CreateSvoFromPointCloud(fileName, discr) ) {
-    std::cout << "Voxel octtree created" << std::endl;
     do {
       std::cout << "Do you want to intersect the voxel octtree with a ray? (y/n)\n";
       std::cin >> repeat;

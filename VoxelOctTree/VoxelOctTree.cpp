@@ -2,6 +2,7 @@
 //
 
 #include "stdafx.h"
+#include <iomanip>
 
 #include "VoxelOctTree.hpp"
 
@@ -74,7 +75,27 @@ namespace VOXEL_OCTTREE {
   }
 
   std::array<int, 8> VoxelOctTree::GetOrderArray(const Ray& ray) const {
+
+    /*std::function<double(const double)> sgn = [&](const double x) -> double {
+      if (x >= 0.0)
+        return 1.0;
+      return -1.0;
+    };
+    
+    std::array<int, 8> AncOrder = {
+      GetDescenantNumber({middle[0] - 0.25 * sgn(ray.direction[0]) * length, middle[1] - 0.25 * sgn(ray.direction[1]) * length, middle[2] - 0.25 * sgn(ray.direction[2]) * length}),
+      GetDescenantNumber({middle[0] + 0.25 * sgn(ray.direction[0]) * length, middle[1] - 0.25 * sgn(ray.direction[1]) * length, middle[2] - 0.25 * sgn(ray.direction[2]) * length}), 
+      GetDescenantNumber({middle[0] - 0.25 * sgn(ray.direction[0]) * length, middle[1] + 0.25 * sgn(ray.direction[1]) * length, middle[2] - 0.25 * sgn(ray.direction[2]) * length}), 
+      GetDescenantNumber({middle[0] + 0.25 * sgn(ray.direction[0]) * length, middle[1] + 0.25 * sgn(ray.direction[1]) * length, middle[2] - 0.25 * sgn(ray.direction[2]) * length}), 
+      GetDescenantNumber({middle[0] - 0.25 * sgn(ray.direction[0]) * length, middle[1] - 0.25 * sgn(ray.direction[1]) * length, middle[2] + 0.25 * sgn(ray.direction[2]) * length}), 
+      GetDescenantNumber({middle[0] + 0.25 * sgn(ray.direction[0]) * length, middle[1] - 0.25 * sgn(ray.direction[1]) * length, middle[2] + 0.25 * sgn(ray.direction[2]) * length}), 
+      GetDescenantNumber({middle[0] - 0.25 * sgn(ray.direction[0]) * length, middle[1] + 0.25 * sgn(ray.direction[1]) * length, middle[2] + 0.25 * sgn(ray.direction[2]) * length}), 
+      GetDescenantNumber({middle[0] + 0.25 * sgn(ray.direction[0]) * length, middle[1] + 0.25 * sgn(ray.direction[1]) * length, middle[2] + 0.25 * sgn(ray.direction[2]) * length})
+    };
+
+    return AncOrder;*/
     std::array<ancestors, 8> AncOrder = {XlessYlessZless, XlessYlessZmore, XlessYmoreZless, XlessYmoreZmore, XmoreYlessZless, XmoreYlessZmore, XmoreYmoreZless, XmoreYmoreZmore};
+
     if (ray.direction[0] < 0.0) {
       for (int i = 0; i < 4; i++) {
         std::swap(AncOrder[i], AncOrder[i+4]);
@@ -137,6 +158,39 @@ namespace VOXEL_OCTTREE {
     return _AncOrder;
   }
 
+  int VoxelOctTree::GetDescenantNumber(const std::array<double, 3> point) const {
+    for (int i = 0; i < 3; i++) {
+      if ( ! (point[i] <= middle[i] + 0.5*length + std::max(abs(middle[i]), length) * std::numeric_limits<double>::epsilon() && 
+           point[i] >= middle[i] - 0.5*length - std::max(abs(middle[i]), length) * std::numeric_limits<double>::epsilon() ) ) {
+        //std::cout << std::fixed << std::setprecision(12) << middle[i] - 0.5*length << " " << point[i] << " " << middle[i] - 0.5*length << std::endl;
+        return -1;
+      }
+    }
+    int number = 0;
+    for (int i = 0; i < 3; i++) {
+      number = number | (static_cast<int>(point[i] <= middle[i]) << i);
+    }
+    return number;
+  }
+
+  std::array<double, 3> VoxelOctTree::GetDescenantMiddle(const std::array<double, 3> point) const {
+    for (int i = 0; i < 3; i++) {
+      if ( ! (point[i] <= middle[i] + 0.5*length + std::max(abs(middle[i]), length) * std::numeric_limits<double>::epsilon() && 
+           point[i] >= middle[i] - 0.5*length - std::max(abs(middle[i]), length) * std::numeric_limits<double>::epsilon() ) ) {
+        //std::cout << std::fixed << std::setprecision(12) << middle[i] - 0.5*length << " " << point[i] << " " << middle[i] - 0.5*length << std::endl;
+        return { std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN(), std::numeric_limits<double>::quiet_NaN() };
+      }
+    }
+    
+    std::function<double(const double, const double)> coef = [&](const double point_coordinate, const double center_coordinate) -> double {
+      return 2.0 * static_cast<double>(point_coordinate > center_coordinate) - 1.0;
+    };
+
+    return { middle[0] + 0.25 * coef(point[0], middle[0]) * length,
+             middle[1] + 0.25 * coef(point[1], middle[1]) * length,
+             middle[2] + 0.25 * coef(point[2], middle[2]) * length};
+  }
+
   // public
 
   VoxelOctTree::VoxelOctTree() {
@@ -179,7 +233,7 @@ namespace VOXEL_OCTTREE {
     discr = _discr;
   }*/
 
-  bool VoxelOctTree::CreateSvoFromPointCloud(const std::string fileName, const unsigned int discretization) {
+  bool VoxelOctTree::CreateSvoFromPointCloud(const std::string fileName, const unsigned int discretization) {    
     std::array<double, 3> x;
     std::array<double, 3> x_min, x_max, x_mid;
     std::list< std::array<double, 3> > pointsList;
@@ -196,6 +250,8 @@ namespace VOXEL_OCTTREE {
       x_min[i] = std::numeric_limits<double>::max();
       x_max[i] = -std::numeric_limits<double>::max();
     }
+
+    std::cout << "Reading file, please wait..." << std::endl;
   
     while (fil >> x[0] >> x[1] >> x[2]) {
       pointsList.emplace_back(x);
@@ -212,8 +268,8 @@ namespace VOXEL_OCTTREE {
     }
     fil.close();
 
-    std::cout << x_max[0] << '\t' << x_max[1] << '\t' << x_max[2] << std::endl;
-    std::cout << x_min[0] << '\t' << x_min[1] << '\t' << x_min[2] << std::endl;
+    /*std::cout << x_max[0] << '\t' << x_max[1] << '\t' << x_max[2] << std::endl;
+    std::cout << x_min[0] << '\t' << x_min[1] << '\t' << x_min[2] << std::endl;*/
 
     for(int i = 0; i < 3; i++) {
       x_mid[i] = (x_max[i] + x_min[i]) / 2.0;
@@ -224,6 +280,17 @@ namespace VOXEL_OCTTREE {
     this->middle = x_mid;
     this->length = model_size;
     this->discr = discretization;
+
+    /*std::cout << GetDescenantNumber({46, 80, 12}) << std::endl;
+    std::cout << GetDescenantNumber({30, 80, 12}) << std::endl;
+    std::cout << GetDescenantNumber({46, 69, 12}) << std::endl;
+    std::cout << GetDescenantNumber({30, 69, 12}) << std::endl;
+    std::cout << GetDescenantNumber({46, 80, 8}) << std::endl;
+    std::cout << GetDescenantNumber({30, 80, 8}) << std::endl;
+    std::cout << GetDescenantNumber({46, 69, 8}) << std::endl;
+    std::cout << GetDescenantNumber({30, 69, 8}) << std::endl;*/
+
+    std::cout << "Creating voxel octtree, please wait..." << std::endl;
 
     for (auto& point : pointsList) {        
       this->AddVoxel(point);
@@ -236,8 +303,9 @@ namespace VOXEL_OCTTREE {
       it++;
     }*/
 
-    std::cout << this->VoxelsCount() << std::endl;
+    //std::cout << this->VoxelsCount() << std::endl;
 
+    std::cout << "Voxel octtree created" << std::endl;
     return true;
   }
 
@@ -246,7 +314,11 @@ namespace VOXEL_OCTTREE {
       return;
     }
 
-    /*if ( (point[0] == 37.534) && (point[1] == 71.774) && (point[2] == 7.737) ) {
+    /*if ( (point[0] >= 31.671) && (point[0] <= 31.671) && 
+         (point[1] >= 68.890999) && (point[1] <= 68.890999) && 
+         (point[2] >= 7.67) && (point[2] <= 7.67)
+      ) {
+      std::cout << "Discr = " << discr << "\nPress any key...\n";
       getchar();
     }*/
 
@@ -347,6 +419,17 @@ namespace VOXEL_OCTTREE {
       std::cerr << "Warning: Point " << point[0] << " " << point[1] << " " << point[2] << " is outside the OctTree!" << std::endl;
       return;
     }
+
+    /*int desc_index = GetDescenantNumber(point);
+    if (desc_index < 0) {
+      std::cerr << "Warning: Point " << point[0] << " " << point[1] << " " << point[2] << " is outside the OctTree!" << std::endl;
+      return;
+    }
+
+    if (this->desc[desc_index] == nullptr) {
+      this->desc[desc_index] = BuildTree(GetDescenantMiddle(point), 0.5 * length, discr - 1, this);
+    }
+    this->desc[desc_index]->AddVoxel(point);*/
   }
 
   unsigned int VoxelOctTree::VoxelsCount() const {
@@ -381,6 +464,9 @@ namespace VOXEL_OCTTREE {
 
     // sequence of ancestors along the ray
     std::array<int, 8> AncOrder = GetOrderArray(ray);  
+    /*for (int i = 0; i < 8; i++) {
+      std::cout << AncOrder[i] << std::endl;
+    }*/
     
     std::function<void(const VoxelOctTree* node, const Ray& ray)> IntersectNode = [&](const VoxelOctTree* node, const Ray& ray) mutable {
       if ( node->IntersectRayBrick(ray) ) {

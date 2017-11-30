@@ -44,6 +44,8 @@ namespace VOXEL_OCTTREE {
 
     bool IntersectRayBrick(const Ray& ray) const;
     std::array<int, 8> GetOrderArray(const Ray& ray) const;
+    int GetDescenantNumber(const std::array<double, 3> point) const;
+    std::array<double, 3> GetDescenantMiddle(const std::array<double, 3> point) const;
 
   public:
     VoxelOctTree();
@@ -55,7 +57,7 @@ namespace VOXEL_OCTTREE {
     void SetDiscr(const unsigned int _discr);*/
 
     // default copy constructor and operator=
-    VoxelOctTree(const VoxelOctTree&) = delete;
+    VoxelOctTree(const VoxelOctTree& other) = delete;
     VoxelOctTree& operator = (const VoxelOctTree& other) = delete;
 
     bool CreateSvoFromPointCloud(const std::string fileName, const unsigned int discretization);

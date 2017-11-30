@@ -43,7 +43,7 @@ namespace VOXEL_OCTTREE {
     void DeleteTree(VoxelOctTree* root);
 
     bool IntersectRayBrick(const Ray& ray) const;
-    void MakeOrderArray(const Ray& ray, std::array<ancestors, 8>& AncOrder) const;
+    std::array<int, 8> GetOrderArray(const Ray& ray) const;
 
   public:
     VoxelOctTree();

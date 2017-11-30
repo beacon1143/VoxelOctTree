@@ -302,7 +302,9 @@ namespace VOXEL_OCTTREE {
     return (t_near <= t_far && t_far >=0);
   }
 
-  void VoxelOctTree::MakeOrderArray(const Ray& ray, std::array<ancestors, 8>& AncOrder) const {
+  std::array<int, 8> VoxelOctTree::GetOrderArray(const Ray& ray) const {
+    std::array<ancestors, 8> AncOrder;
+
     if (ray.direction[0] >= 0.0) { // x > 0
       if (ray.direction[1] >= 0.0) { // y > 0
         if (ray.direction[2] >= 0.0) { // z > 0
@@ -339,6 +341,13 @@ namespace VOXEL_OCTTREE {
         }
       }
     }
+
+    std::array<int, 8> _AncOrder;
+    for (int i = 0; i < 8; i++) {
+      _AncOrder[i] = static_cast<int>(AncOrder[i]);
+    }
+
+    return _AncOrder;
   }
 
   void VoxelOctTree::FindIntersectedVoxels(const Ray& ray, std::string file_name) const {
@@ -351,9 +360,8 @@ namespace VOXEL_OCTTREE {
     }
 
     // sequence of ancestors along the ray
-    std::array<ancestors, 8> AncOrder;  
-    MakeOrderArray(ray, AncOrder);
-
+    std::array<int, 8> AncOrder = GetOrderArray(ray);  
+    
     std::function<void(const VoxelOctTree* node, const Ray& ray)> IntersectNode = [&](const VoxelOctTree* node, const Ray& ray) mutable {
       if ( node->IntersectRayBrick(ray) ) {
         //std::cout << "Intersected! Size is " << node->discr << std::endl;
@@ -362,8 +370,8 @@ namespace VOXEL_OCTTREE {
         }
         else {
           for (int i = 0; i < 8; i++) {
-            if (node->desc[ static_cast<int>(AncOrder[i]) ] != nullptr )
-              IntersectNode(node->desc[ static_cast<int>(AncOrder[i]) ], ray);
+            if (node->desc[AncOrder[i]] != nullptr )
+              IntersectNode(node->desc[AncOrder[i]], ray);
           } // for
         } // else
       } // if    

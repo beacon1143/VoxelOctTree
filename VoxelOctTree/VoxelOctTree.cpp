@@ -292,7 +292,7 @@ namespace VOXEL_OCTTREE {
 
     std::cout << "Creating voxel octtree, please wait..." << std::endl;
 
-    for (auto& point : pointsList) {        
+    for (const auto& point : pointsList) {        
       this->AddVoxel(point);
     }
 
@@ -305,7 +305,7 @@ namespace VOXEL_OCTTREE {
 
     pointsList.clear();
 
-    //std::cout << this->VoxelsCount() << std::endl;
+    //std::cout << "Voxels amount is " << this->VoxelsCount() << std::endl;
 
     std::cout << "Voxel octtree created" << std::endl;
     return true;
@@ -434,25 +434,18 @@ namespace VOXEL_OCTTREE {
     this->desc[desc_index]->AddVoxel(point);*/
   }
 
-  unsigned int VoxelOctTree::VoxelsCount() const {
-    unsigned int counter = 0;
-    //this->CounterIncreaser(counter);  
-
-     std::function<void(const VoxelOctTree* oct_tree)>CounterIncreaser = [&](const VoxelOctTree* oct_tree) /*mutable*/ {
-      if(oct_tree->discr == 0) {
-        counter++;
+  unsigned int VoxelOctTree::VoxelsCount() const {        
+    if (this->discr == 0) {
+      return 1;
+    }
+    
+    unsigned int sum = 0;
+    for (int i = 0; i < 8; i++) {
+      if (this->desc[i] != nullptr) {
+        sum += this->desc[i]->VoxelsCount();
       }
-      else {
-        for (int i = 0; i < 8; i++) {
-          if(oct_tree->desc[i] != nullptr) {
-            CounterIncreaser(oct_tree->desc[i]);
-          }
-        }
-      }
-    };
-
-    CounterIncreaser(this);
-    return counter;
+    }   
+    return sum;
   }
   
   void VoxelOctTree::FindIntersectedVoxels(const Ray& ray, std::string file_name) const {

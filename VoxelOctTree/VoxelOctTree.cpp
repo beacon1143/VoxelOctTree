@@ -303,6 +303,8 @@ namespace VOXEL_OCTTREE {
       it++;
     }*/
 
+    pointsList.clear();
+
     //std::cout << this->VoxelsCount() << std::endl;
 
     std::cout << "Voxel octtree created" << std::endl;

@@ -7,15 +7,31 @@
 
 using namespace VOXEL_OCTTREE;
 
-int main()
+int main(int argc, char* argv[])
 {
+  std::ios::sync_with_stdio(false);
+
   VoxelOctTree root;
   std::string fileName;
   unsigned int discr;
-  std::cout << "Input name of the file with point cloud:\n";    // transformer.xyz
-  std::cin >> fileName;
-  std::cout << "Input degree of discretization (number of levels in voxel octtree):\n";    // 8
-  std::cin >> discr;
+
+  if (argc <= 1) {
+    std::cout << "Input name of the file with point cloud:\n";    // transformer.xyz
+    std::cin >> fileName;
+  }
+  else {
+    fileName = static_cast<std::string>(argv[1]);
+    std::cout << "File with point cloud is " << fileName << std::endl;
+  }
+
+  if (argc <= 2) {
+    std::cout << "Input degree of discretization (number of levels in voxel octtree):\n";    // 8
+    std::cin >> discr;
+  }
+  else {
+    discr = atoi(argv[2]);
+    std::cout << "Degree of discretization (number of levels in voxel octtree) " << discr << std::endl;
+  }
   
   std::string repeat;
   Ray ray;

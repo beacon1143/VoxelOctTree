@@ -2,7 +2,6 @@
 //
 
 #include "stdafx.h"
-#include <iomanip>
 
 #include "VoxelOctTree.hpp"
 
@@ -239,8 +238,13 @@ namespace VOXEL_OCTTREE {
     std::list< std::array<double, 3> > pointsList;
     //int pointsListSize = 0;
 
-    std::fstream fil;
-    fil.open(fileName.c_str(), std::fstream::in);
+    /*std::chrono::time_point<std::chrono::system_clock> start, end;
+    start = std::chrono::system_clock::now();*/
+
+    std::ifstream fil;
+    std::ifstream::sync_with_stdio(false);
+    
+    fil.open(fileName.c_str());
     if (!fil.is_open()) {
       std::cerr << "Cannot open file " << fileName.c_str() << std::endl;
       return false;
@@ -253,7 +257,7 @@ namespace VOXEL_OCTTREE {
 
     std::cout << "Reading file, please wait..." << std::endl;
   
-    while (fil >> x[0] >> x[1] >> x[2]) {
+    while ( fil >> x[0] >> x[1] >> x[2] ) {
       pointsList.emplace_back(x);
       //pointsListSize++;
     
@@ -267,6 +271,10 @@ namespace VOXEL_OCTTREE {
       }
     }
     fil.close();
+
+    /*end = std::chrono::system_clock::now();
+    int elapsed_ms = static_cast<int>( std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() );
+    std::cout << "Time of file reading is " << elapsed_ms << " ms\n";*/
 
     /*std::cout << x_max[0] << '\t' << x_max[1] << '\t' << x_max[2] << std::endl;
     std::cout << x_min[0] << '\t' << x_min[1] << '\t' << x_min[2] << std::endl;*/

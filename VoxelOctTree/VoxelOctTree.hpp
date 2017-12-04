@@ -6,6 +6,10 @@
 #include <iostream>
 #include <functional>
 #include <list>
+#include <iomanip>
+#include <chrono>
+#include <string>
+#include <algorithm>
 
 namespace VOXEL_OCTTREE {
 
@@ -48,8 +52,8 @@ namespace VOXEL_OCTTREE {
     std::array<double, 3> GetDescenantMiddle(const std::array<double, 3> point) const;
 
   public:
-    VoxelOctTree();
-    VoxelOctTree(const std::array<double, 3> _middle, const double _length, const unsigned int _discr);
+    explicit VoxelOctTree();
+    explicit VoxelOctTree(const std::array<double, 3> _middle, const double _length, const unsigned int _discr);
     ~VoxelOctTree();
 
     /*void SetMiddle(const std::array<double, 3> _middle);

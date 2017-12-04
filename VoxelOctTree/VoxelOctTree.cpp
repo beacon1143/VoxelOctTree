@@ -279,8 +279,8 @@ namespace VOXEL_OCTTREE {
     /*std::cout << x_max[0] << '\t' << x_max[1] << '\t' << x_max[2] << std::endl;
     std::cout << x_min[0] << '\t' << x_min[1] << '\t' << x_min[2] << std::endl;*/
 
-    for(int i = 0; i < 3; i++) {
-      x_mid[i] = (x_max[i] + x_min[i]) / 2.0;
+    for (int i = 0; i < 3; i++) {
+      x_mid[i] = 0.5 * (x_max[i] + x_min[i]);
     }
 
     double model_size = std::max((x_max[0] - x_min[0]), std::max(x_max[1] - x_min[1], x_max[2] - x_min[2]));

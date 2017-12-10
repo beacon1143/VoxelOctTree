@@ -1,16 +1,5 @@
 #pragma once
 
-#include <omp.h>
-#include <array>
-#include <fstream>
-#include <iostream>
-#include <functional>
-#include <list>
-#include <iomanip>
-#include <chrono>
-#include <string>
-#include <algorithm>
-
 namespace VOXEL_OCTTREE {
 
   typedef enum {

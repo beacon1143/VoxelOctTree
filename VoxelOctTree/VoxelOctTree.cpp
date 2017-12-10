@@ -48,7 +48,7 @@ namespace VOXEL_OCTTREE {
 
     // directions loop
     for (int i = 0; i < 3; i++) {
-      if (ray.direction[i] != 0.0) {
+      if ( abs(ray.direction[i]) >= std::numeric_limits<double>::epsilon() ) {
         t1 = (brick.min_point[i] - ray.start[i]) / ray.direction[i];
         t2 = (brick.max_point[i] - ray.start[i]) / ray.direction[i];
     
@@ -252,7 +252,7 @@ namespace VOXEL_OCTTREE {
 
     for (int i = 0; i < 3; i++) {
       x_min[i] = std::numeric_limits<double>::max();
-      x_max[i] = -std::numeric_limits<double>::max();
+      x_max[i] = std::numeric_limits<double>::lowest();
     }
 
     std::cout << "Reading file, please wait..." << std::endl;

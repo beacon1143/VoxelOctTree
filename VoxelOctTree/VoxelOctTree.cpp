@@ -471,7 +471,7 @@ namespace VOXEL_OCTTREE {
       std::cout << AncOrder[i] << std::endl;
     }*/
     
-    std::function<void(const VoxelOctTree* node, const Ray& ray)> IntersectNode = [&](const VoxelOctTree* node, const Ray& ray) mutable {
+    std::function<void(const VoxelOctTree* node, const Ray& ray)> IntersectNode = [&](const VoxelOctTree* node, const Ray& ray) {
       if ( node->IntersectRayBrick(ray) ) {
         //std::cout << "Intersected! Size is " << node->discr << std::endl;
         if (node->discr == 0) {

@@ -41,7 +41,7 @@ namespace VOXEL_OCTTREE {
     std::array<double, 3> GetDescenantMiddle(const std::array<double, 3> point) const;
 
   public:
-    explicit VoxelOctTree();
+    VoxelOctTree();
     explicit VoxelOctTree(const std::array<double, 3> _middle, const double _length, const unsigned int _discr);
     ~VoxelOctTree();
 

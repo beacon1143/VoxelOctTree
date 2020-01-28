@@ -471,7 +471,8 @@ namespace VOXEL_OCTTREE {
       std::cout << AncOrder[i] << std::endl;
     }*/
     
-    std::function<void(const VoxelOctTree* node, const Ray& ray)> IntersectNode = [&](const VoxelOctTree* node, const Ray& ray) {
+    //std::function<void(const VoxelOctTree* node, const Ray& ray)> IntersectNode = [&](const VoxelOctTree* node, const Ray& ray) {
+    auto IntersectNode = [&output_file, AncOrder](auto& self, const VoxelOctTree* node, const Ray& ray) -> void {
       if ( node->IntersectRayBrick(ray) ) {
         //std::cout << "Intersected! Size is " << node->discr << std::endl;
         if (node->discr == 0) {
@@ -480,13 +481,13 @@ namespace VOXEL_OCTTREE {
         else {
           for (int i = 0; i < 8; i++) {
             if (node->desc[AncOrder[i]] != nullptr )
-              IntersectNode(node->desc[AncOrder[i]], ray);
+              self(self, node->desc[AncOrder[i]], ray);
           } // for
         } // else
       } // if    
     };
 
-    IntersectNode(this, ray);
+    IntersectNode(IntersectNode, this, ray);
 
     output_file.close();
   }

@@ -258,7 +258,7 @@ namespace VOXEL_OCTTREE {
     std::cout << "Reading file, please wait..." << std::endl;
   
     while ( fil >> x[0] >> x[1] >> x[2] ) {
-      pointsList.emplace_back(x);
+      pointsList.push_back(x);
       //pointsListSize++;
     
       for (int i = 0; i < 3; i++) {

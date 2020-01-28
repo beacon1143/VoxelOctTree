@@ -26,7 +26,7 @@ namespace VOXEL_OCTTREE {
           delete root->desc[i];
           root->desc[i] = nullptr;
         }
-      }      
+      }
     }
   }
 
@@ -246,8 +246,9 @@ namespace VOXEL_OCTTREE {
     
     fil.open(fileName.c_str());
     if (!fil.is_open()) {
-      std::cerr << "Cannot open file " << fileName.c_str() << std::endl;
-      return false;
+      /*std::cerr << "Cannot open file " << fileName.c_str() << std::endl;
+      return false;*/
+      throw std::runtime_error("Error! Cannot open file!\n");
     }
 
     for (int i = 0; i < 3; i++) {

@@ -51,7 +51,10 @@ namespace VOXEL_OCTTREE {
 
     // default copy constructor and operator=
     VoxelOctTree(const VoxelOctTree& other) = delete;
-    VoxelOctTree& operator = (const VoxelOctTree& other) = delete;
+    VoxelOctTree& operator=(const VoxelOctTree& other) = delete;
+    // default move constructor and move assignment operator
+    VoxelOctTree(VoxelOctTree&& tmp) = delete;
+    VoxelOctTree& operator=(VoxelOctTree&& tmp) = delete;
 
     bool CreateSvoFromPointCloud(const std::string fileName, const unsigned int discretization);
 
